@@ -1,4 +1,3 @@
-import ratelimit
 from web3 import Web3
 import os
 import json
@@ -7,7 +6,7 @@ import pymongo
 import time
 import schedule
 import requests
-from ratelimit import limits, sleep_and_retry, RateLimitException
+from ratelimit import limits, sleep_and_retry
 
 dotenv.load_dotenv()
 
