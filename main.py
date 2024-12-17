@@ -1,4 +1,4 @@
-ufrom web3 import Web3
+from web3 import Web3
 import os
 import json
 import dotenv
