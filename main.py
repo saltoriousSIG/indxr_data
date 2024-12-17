@@ -1,4 +1,4 @@
-from web3 import Web3
+ufrom web3 import Web3
 import os
 import json
 import dotenv
@@ -63,7 +63,7 @@ def fetch_prices():
         indexdb.insert_one({"address":indexadr,"total":total, "breakdown":prices, "timestamp":int(time.time())})
     print("Updated: "+time.strftime("%Y-%m-%d %H:%M:%S"))
 
-#schedule.every(5).minutes.do(fetch_prices)
+schedule.every(5).minutes.do(fetch_prices)
 #schedule.every(20).seconds.do(fetch_prices)
 
 
