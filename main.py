@@ -15,8 +15,8 @@ address = os.getenv("ADDRESS")
 baseURL = "https://base.blockscout.com/api/v2"
 
 dbclient = pymongo.MongoClient(os.getenv("DB_URL"))
-dbsp = dbclient['Elixr-data']
-indexdb = dbsp['indexhistory']
+dbsp = dbclient[os.getenv("DB_COLLECTION")]
+indexdb = dbsp[os.getenv("DB_TABLE")]
 
 with open('abi/indxr.json', 'r') as file:
     elixrABI = json.load(file)
@@ -52,16 +52,20 @@ def fetch_prices():
             balance = token[2] / 10 ** 18
 
             response = requests.get(f"{baseURL}/tokens/{contract_address}")
-            tokenprice = float(response.json()['exchange_rate']) * balance
+            if response.status_code == 200:
+                tokenprice = float(response.json()['exchange_rate']) * balance
 
-            prices.append({contract_address:tokenprice})
-            total += tokenprice
+                prices.append({contract_address:tokenprice})
+                total += tokenprice
+            else:
+                print(f"Error with getting price for {contract_address}: {response.status_code} - {response.text}")
 
         indexdb.insert_one({"address":indexadr,"total":total, "breakdown":prices, "timestamp":int(time.time())})
     print("Updated: "+time.strftime("%Y-%m-%d %H:%M:%S"))
 
+#schedule.every(5).minutes.do(fetch_prices)
+#schedule.every(20).seconds.do(fetch_prices)
 
-schedule.every(1).minutes.do(fetch_prices)
 
 while True:
     schedule.run_pending()
