@@ -1,0 +1,144 @@
+[
+  {
+    "inputs": [],
+    "name": "fetch_app_storage",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "min_buy",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BPS_BASE",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "platform",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creator_payout",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "WETH",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "quote",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "swap",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "admin",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct LibIndxrDiamond.IndxBaseDataStorage",
+        "name": "base_data_storage",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fetch_indx",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "token_addresses",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "index_token_supply",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "index_eth_value",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fetch_indx_tokens",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "weight",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "balance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "balance_eth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint24",
+            "name": "pool_fee",
+            "type": "uint24"
+          }
+        ],
+        "internalType": "struct LibIndxrDiamond.Tokens[]",
+        "name": "tokens",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fetch_users_in_indx",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "users",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "user_count",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
+

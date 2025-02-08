@@ -1,71 +1,95 @@
 from web3 import Web3
+from ratelimit import limits, sleep_and_retry
+from timescale_connector import TimescaleConnection
+from datetime import datetime
 import os
 import json
+import pytz
 import dotenv
-import pymongo
 import time
 import schedule
 import requests
-from ratelimit import limits, sleep_and_retry
-
 dotenv.load_dotenv()
 
-w3 = Web3(Web3.HTTPProvider(os.getenv("PROVIDER_URL")))
-address = os.getenv("ADDRESS")
-baseURL = "https://base.blockscout.com/api/v2"
+#TODO: Batch calls for if there are a large number of indexes
 
-dbclient = pymongo.MongoClient(os.getenv("DB_URL"))
-dbsp = dbclient[os.getenv("DB_COLLECTION")]
-indexdb = dbsp[os.getenv("DB_TABLE")]
+# constants
+diamond_address = os.getenv("DIAMOND_FACET_ADDRESS")
+with open('abi/indxr_data_facet.json', 'r') as file:
+    indxr_data_abi = json.load(file)
+with open('abi/global_datastore_facet.json','r') as file:
+    global_data_abi = json.load(file)
+with open('abi/erc20_abi.json','r') as file:
+    erc20_abi = json.load(file)
 
-with open('abi/indxr.json', 'r') as file:
-    elixrABI = json.load(file)
+#connectors
+w3 = Web3(Web3.HTTPProvider(os.getenv("RPC_URL")))
+global_data = w3.eth.contract(address=diamond_address, abi=global_data_abi)
 
-with open('abi/datastore.json','r') as file:
-    datastoreABI = json.load(file)
-
-datastore = w3.eth.contract(address=address, abi=datastoreABI)
-
-@sleep_and_retry
-@limits(calls=5, period=1)
 def get_index_addresses():
-    return datastore.functions.getIndexes().call()
+    return global_data.functions.get_all_indexes().call()
+
+def get_tokens(index_address):
+    indx = w3.eth.contract(address=index_address, abi=indxr_data_abi)
+    return indx.functions.fetch_indx_tokens().call()
 
 @sleep_and_retry
 @limits(calls=5, period=1)
-def get_tokens(indexobj):
-    return indexobj.functions.fetch_index().call()[0]
+def fetch_blockscout_data(address): 
+    try:
+        baseURL = "https://base.blockscout.com/api/v2"
+        response = requests.get(f"{baseURL}/tokens/{address}")
+        response.raise_for_status() 
+        return response.json()
+    except HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
+    except JSONDecodeError as json_err:
+        print(f"JSON decode error: {json_err}")
+        return None
+    except Exception as err:
+        print(f"An unexpected error occurred: {err}")
+        return None
+    return None
 
 def fetch_prices():
+    db = TimescaleConnection(os.getenv("DB_HOST_NEW"), os.getenv("DB_PORT_NEW"), os.getenv("DB_NAME_NEW"), os.getenv("DB_USER_NEW"), os.getenv("DB_PASS_NEW"))
+    db.connect()
     """get all indexes from main smart contract"""
-    for indexadr in get_index_addresses():
+    for index_address in get_index_addresses():
         """create index obj"""
-        indexobj = w3.eth.contract(address=indexadr ,abi=elixrABI)
-
-        total = 0
-        prices = []
-
-        """get all tokens in indexobj"""
-        tokens = get_tokens(indexobj)
+        total_value = 0
+        #get all tokens in indexobj
+        tokens = get_tokens(index_address)
         for token in tokens:
-            contract_address = token[0]
-            balance = token[2] / 10 ** 18
-
-            response = requests.get(f"{baseURL}/tokens/{contract_address}")
-            if response.status_code == 200:
-                tokenprice = float(response.json()['exchange_rate']) * balance
-
-                prices.append({contract_address:tokenprice})
-                total += tokenprice
+            print(token)
+            print(token[2])
+            tkn,_,bal,_,_ = token
+            token_address = tkn
+            token = w3.eth.contract(address=token_address, abi=erc20_abi)
+            price_data = fetch_blockscout_data(token_address)
+            decimals = token.functions.decimals().call()
+            print(decimals)
+            balance = bal / 10 ** decimals 
+            if bool(price_data):
+                tokenprice = float(price_data['exchange_rate']) * balance
+                total_value += tokenprice
             else:
                 print(f"Error with getting price for {contract_address}: {response.status_code} - {response.text}")
+        #add to timescaledb 
+        # Convert integer timestamp to datetime
+        timestamp = pytz.utc.localize(datetime.fromtimestamp(int(time.time())))
+        db.insert("indx_prices_hyper",{
+            'time': timestamp, 
+            'indx_address': index_address,
+            'price': total_value
+        })
+    db.close()
 
-        indexdb.insert_one({"address":indexadr,"total":total, "breakdown":prices, "timestamp":int(time.time())})
-    print("Updated: "+time.strftime("%Y-%m-%d %H:%M:%S"))
-
-schedule.every(5).minutes.do(fetch_prices)
-#schedule.every(20).seconds.do(fetch_prices)
-
+schedule.every(1).minutes.do(fetch_prices)
 
 while True:
     schedule.run_pending()

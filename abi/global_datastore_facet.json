@@ -1,0 +1,157 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "index",
+        "type": "address"
+      }
+    ],
+    "name": "add_index",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "index",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "add_user_index",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fetch_diamond_storage",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "swap",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "quote",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "WETH",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "factory",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "platform",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "min_buy",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "new_indx_fee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BPS_BASE",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "creator_payout",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct LibDiamond.LibStorage",
+        "name": "diamondStorage",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fetch_indxr_facet_addresses",
+    "outputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "facetAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes4[]",
+                "name": "functionSelectors",
+                "type": "bytes4[]"
+              }
+            ],
+            "internalType": "struct LibDiamond.FacetData[]",
+            "name": "facets",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct LibDiamond.IndxrFacetStorage",
+        "name": "indxrFacetStorage",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "get_all_indexes",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "indexes",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "get_user_indexes",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "user_indexes",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
